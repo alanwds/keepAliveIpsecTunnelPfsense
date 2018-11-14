@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Script to parser config.xml from pfsense and send a spoofed package from pfsense to ip setted on automatically ping
+#Script to parser config.xml from pfsense and send a spoofed package from pfsense to ip setted on automatically ping (or remote network, if no ip is setted)
 #How it works:
 #1 - Create a list with dict (i.e. tunnel) with tunnel description, source network and ip to send package. If no ip was setted, we use the remote network as destination. The IP can have a port too.  To use that, you have to add ip:port on automatically ping host.
 #2 - Interact with each dict and send the package from source network
@@ -73,8 +73,8 @@ def getTunnelsInfo():
 
                 tunnelDict['name'] = tunnel.find('descr').text
                 tunnelDict['pinghost'] = tunnel.find('pinghost').text
-                tunnelDict['sourceNetwork'] = tunnel.find('remoteid/address').text
-		tunnelDict['destinationNetwork'] = tunnel.find('localid/address').text
+                tunnelDict['remoteNetwork'] = tunnel.find('remoteid/address').text
+		tunnelDict['localNetwork'] = tunnel.find('localid/address').text
 		tunnelList.append(tunnelDict)
 
 	return tunnelList
@@ -88,10 +88,10 @@ if __name__ == '__main__':
 
         for tunnel in tunnels:
 		if tunnel['pinghost'] is not None:
-               		print "Working on tunnel %s - network %s - ip to send package %s" % (tunnel['name'],tunnel['sourceNetwork'],tunnel['pinghost'])
-			sendPackage(tunnel['sourceNetwork'],tunnel['pinghost'])
+               		print "Working on tunnel %s - network %s - ip to send package %s" % (tunnel['name'],tunnel['localNetwork'],tunnel['pinghost'])
+			sendPackage(tunnel['localNetwork'],tunnel['pinghost'])
 		else:
 			print "No automatically ping ip was founded. Let's use remote network"
-                	print "Working on tunnel %s - network %s - ip to send package %s" % (tunnel['name'],tunnel['sourceNetwork'],tunnel['destinationNetwork'])
-			sendPackage(tunnel['sourceNetwork'],tunnel['destinationNetwork'])
+                	print "Working on tunnel %s - network %s - ip to send package %s" % (tunnel['name'],tunnel['localNetwork'],tunnel['remoteNetwork'])
+			sendPackage(tunnel['localNetwork'],tunnel['remoteNetwork'])
 			

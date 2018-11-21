@@ -1,10 +1,14 @@
 # Description
 
-Script to parser config.xml from pfsense and send a spoofed package from pfsense to ip setted on automatically ping. If no IP is setted, the script will send the package to remote network with a random port
+Script to parser config.xml from pfsense and send a spoofed package from pfsense to ip setted on automatically ping.  There are two work modes:
+
+1 - Spoofed IP using scapy - Send a spoofed package from pfsense to ip setted on automatically ping. If no IP is setted, the script will send the package to remote network with a random port
+2 - Nmap scan - Run a nmap scan using nmap -e {interface} -S source_ip dest_ip -sS from pfsense to remote network. To use this, you should set nmapMode = True on script variables section. 
 
 ## Dependencies
 
 - Cron service on PfSense
+- Nmap
 
 ## How it works
 
@@ -14,6 +18,7 @@ Script to parser config.xml from pfsense and send a spoofed package from pfsense
 ### Installation
 
 - You have to put keepAliveNatedIpsecPfsense.py on pfsense filesystem. (/usr/local/bin/ in this example)
+- Set the correct variables on variables section (interface, timeout and - if you like - nmap mode)
 - Install cron service at pfsense packages manager
 - Configure job as bellow
 ```

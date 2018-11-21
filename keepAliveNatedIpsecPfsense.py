@@ -10,9 +10,15 @@ from random import randint
 import xml.etree.cElementTree as ET
 
 #Get XML conf
-PFSENSE_CONF = './config.xml'
+PFSENSE_CONF = '/conf/config.xml'
 tree = ET.parse(PFSENSE_CONF)
 root = tree.getroot()
+
+#Variables
+nmapMode = True
+interface = 'ixv0'
+timeout = '1' #nmapMode only
+#/Variables
 
 try:
 	from scapy.all import *
@@ -52,8 +58,27 @@ def sendPackage(source_ip,dst_ip):
 
 	try:
 		send(spoofed_packet)
+
 	except:
 		print "Error to send package to ",dst_ip
+
+def sendPackageNmap(source_ip,dst_ip):
+
+        #Split dst_ip to get only IP (case ip has port  too)
+        if ":" in dst_ip:
+                tmp = dst_ip.split(":")
+                dst_ip = tmp[0]
+
+	command = "nmap --host-timeout " + timeout + " -e " + interface + " -S " + source_ip + " " + dst_ip
+
+        print "Sending spoofed package from %s to %s" % (source_ip,dst_ip)
+
+        try:
+		result = os.system(command)
+		return 0
+        except:
+                print "Error to send package to ",dst_ip
+		return 1
 
 
 #Function to get tunnels info
@@ -89,9 +114,16 @@ if __name__ == '__main__':
         for tunnel in tunnels:
 		if tunnel['pinghost'] is not None:
                		print "Working on tunnel %s - network %s - ip to send package %s" % (tunnel['name'],tunnel['localNetwork'],tunnel['pinghost'])
-			sendPackage(tunnel['localNetwork'],tunnel['pinghost'])
+			if nmapMode:
+				sendPackageNmap(tunnel['localNetwork'],tunnel['pinghost'])
+			else:
+				sendPackage(tunnel['localNetwork'],tunnel['pinghost'])
 		else:
 			print "No automatically ping ip was founded. Let's use remote network"
                 	print "Working on tunnel %s - network %s - ip to send package %s" % (tunnel['name'],tunnel['localNetwork'],tunnel['remoteNetwork'])
-			sendPackage(tunnel['localNetwork'],tunnel['remoteNetwork'])
-			
+			if nmapMode:
+				sendPackageNmap(tunnel['localNetwork'],tunnel['remoteNetwork'])
+			else:
+				sendPackage(tunnel['localNetwork'],tunnel['remoteNetwork'])
+ 
+

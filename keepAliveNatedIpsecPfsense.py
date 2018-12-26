@@ -18,6 +18,7 @@ root = tree.getroot()
 nmapMode = True
 interface = 'ixv0'
 timeout = '1' #nmapMode only
+nmap = '/usr/local/bin/nmap'
 #/Variables
 
 try:
@@ -69,7 +70,7 @@ def sendPackageNmap(source_ip,dst_ip):
                 tmp = dst_ip.split(":")
                 dst_ip = tmp[0]
 
-	command = "nmap --host-timeout " + timeout + " -e " + interface + " -S " + source_ip + " " + dst_ip
+	command = nmap + " --host-timeout " + timeout + " -e " + interface + " -S " + source_ip + " " + dst_ip
 
         print "Sending spoofed package from %s to %s" % (source_ip,dst_ip)
 
